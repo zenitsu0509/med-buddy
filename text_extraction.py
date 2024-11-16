@@ -12,7 +12,8 @@ class TextExtraction:
 
 
         text = pytesseract.image_to_string(thresh)
-        return text
+        
+        return " ".join(text.split())
 
 
     
