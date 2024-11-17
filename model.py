@@ -1,47 +1,23 @@
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
-from transformers import AutoTokenizer, BertForQuestionAnswering
 
-# Define model path
-model_path = r"E:\GIT REPOS\medince project\med-buddy\model"
+model_path = "./med-buddy-llm"
 
-# Load tokenizer
-try:
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    print("Tokenizer loaded successfully.")
-except Exception as e:
-    print(f"Error loading tokenizer: {e}")
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
-# Load model
-try:
-    model = BertForQuestionAnswering.from_pretrained(model_path, local_files_only=True)
-    print("Model loaded successfully.")
-except Exception as e:
-    print(f"Error loading model: {e}")
+def generate_medicine_info(input_text):
+    inputs = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = model.generate(
+            input_ids=inputs["input_ids"],
+            max_length=100,
+            num_beams=4,
+            early_stopping=True
+        )
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response
 
-# Check if GPU is available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
-
-# Test with a sample question
-question = "What are the uses of Avastin 400mg Injection?"
-context = (
-    "Medicine Name: Avastin 400mg Injection, Composition: Bevacizumab (400mg), "
-    "Uses: Cancer of colon and rectum, lung cancer, "
-    "Side Effects: Headache, taste change, rectal bleeding."
-)
-
-# Tokenize input
-inputs = tokenizer(question, context, return_tensors="pt", truncation=True)
-inputs = {k: v.to(device) for k, v in inputs.items()}
-
-# Get model predictions
-with torch.no_grad():
-    outputs = model(**inputs)
-
-# Extract start and end logits
-start_idx = torch.argmax(outputs.start_logits)
-end_idx = torch.argmax(outputs.end_logits) + 1
-
-# Decode the predicted answer
-answer = tokenizer.decode(inputs['input_ids'][0][start_idx:end_idx])
-print(f"Predicted Answer: {answer}")
+test_input = "Paracetamol Tablets PARA 500"
+output = generate_medicine_info(test_input)
+print(f"Input: {test_input}\nOutput: {output}")
