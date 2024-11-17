@@ -1,3 +1,4 @@
 model.safetensors
 .venv
 test.py
+optimizer.pt
