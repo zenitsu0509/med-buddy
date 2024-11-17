@@ -2,3 +2,4 @@ model.safetensors
 .venv
 test.py
 optimizer.pt
+__pycache__
