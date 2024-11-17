@@ -1,3 +1,7 @@
 .venv
 test.py
-pacacetamol-tablet.jpg
+paracetamol-tablet.jpg
+config.json
+model
+generation_config.json
+model.

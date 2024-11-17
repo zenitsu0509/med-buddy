@@ -1,7 +1,7 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
-model_path = "./med-buddy-llm"
+model_path = "model"
 
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
@@ -18,6 +18,6 @@ def generate_medicine_info(input_text):
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return response
 
-test_input = "Paracetamol Tablets PARA 500"
+test_input = "Avastin 400mg Injection"
 output = generate_medicine_info(test_input)
 print(f"Input: {test_input}\nOutput: {output}")
