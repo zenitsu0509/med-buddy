@@ -14,7 +14,7 @@ def generate_medicine_info(input_text):
     with torch.no_grad():
         outputs = model.generate(
             input_ids=inputs["input_ids"],
-            max_length=100,
+            max_length=200,
             num_beams=4,
             early_stopping=True
         )
