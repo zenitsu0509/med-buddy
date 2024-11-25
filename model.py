@@ -1,27 +1,41 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from unsloth import FastLanguageModel
+from transformers import AutoTokenizer
 import torch
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+torch.cuda.is_available = lambda: False
+torch.cuda.get_device_capability = lambda device=None: (0, 0)
+model_dir = "model"  
 
-# Path to the folder where the trained model is saved
-model_path = "E:\\GIT REPOS\\medince project\\med-buddy\\model"
+tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
-# Load the tokenizer and model from the path
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_path, trust_remote_code=True)  # Safetensors support
+model = FastLanguageModel.from_pretrained(
+    model_name=model_dir,
+    adapter_path=f"{model_dir}/adapter_model.safetensors",
+    max_seq_length=5020,
+    load_in_4bit=False, 
+    dtype=None,
+)
 
-# Function to generate medicine information
-def generate_medicine_info(input_text):
-    inputs = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True)
+model.eval()
+
+def test_model(input_text):
+    inputs = tokenizer(input_text, return_tensors="pt", truncation=True, padding="max_length", max_length=512)
+    device = torch.device("cpu")
+    model = model.to(device)
+    inputs = inputs.to(device)
     with torch.no_grad():
         outputs = model.generate(
             input_ids=inputs["input_ids"],
-            max_length=200,
-            num_beams=4,
-            early_stopping=True
+            max_length=512,
+            num_beams=5,
+            no_repeat_ngram_size=2,
+            early_stopping=True,
         )
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return response
+    
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-# Test the model with a sample input
-test_input = "Avastin 400mg Injection"
-output = generate_medicine_info(test_input)
-print(f"Input: {test_input}\nOutput: {output}")
+test_input = "Tamdura Capsule PR"
+result = test_model(test_input)
+print("Input:", test_input)
+print("Generated Output:", result)
