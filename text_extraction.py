@@ -14,3 +14,6 @@ class TextExtraction:
         text = pytesseract.image_to_string(thresh)
         
         return " ".join(text.split())
+extract = TextExtraction()
+path = "paracetamol-tablet.jpg"
+print(extract.extract_image_info(path))
