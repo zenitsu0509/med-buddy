@@ -18,12 +18,12 @@ class MedicineNameExtractor:
         """Extract text from the given image using Tesseract OCR."""
         try:
             text = pytesseract.image_to_string(Image.open(image_path))
+            text = text.lower()
             return " ".join(text.split())  # Clean up whitespace
         except Exception as e:
             raise RuntimeError(f"Error extracting text from image: {e}")
 
     def _query_huggingface_api(self, text):
-        """Query the Hugging Face API to extract the brand name from the text."""
         headers = {"Authorization": f"Bearer {self.api_token}"}
         precise_prompt = f"""
         You are a medical drug store operator, who is expert in medicines and names. 
@@ -31,8 +31,8 @@ class MedicineNameExtractor:
         Always return the response in the following format:
 
         Example: 
-        {{'input': 'PARACIP-500 Tablet', 'output': 'PARACIP'}}
-        {{'input': 'Azithromycin Tablets IP 500 mg Azithral-500', 'output': 'Azithral'}}
+        {{'input': 'PARACIP-500 Tablet', 'output': 'PARACIP-500'}}
+        {{'input': 'Azithromycin Tablets IP 500 mg Azithral-500', 'output': 'Azithral-500'}}
 
         Text to process: '{text}'
 
@@ -61,5 +61,5 @@ class MedicineNameExtractor:
 
     def extract_medicine_name(self, image_path):
         """Extract the medicine name from the given image."""
-        text = self._extract_text_from_image(image_path)
+        text =  self._extract_text_from_image(image_path)
         return self._query_huggingface_api(text)

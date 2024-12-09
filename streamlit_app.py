@@ -33,7 +33,7 @@ def search_medical_database(query, top_k=5):
     # Perform search
     results = index.query(
         vector=query_embedding, 
-        top_k=top_k, 
+        top_k=3, 
         include_metadata=True
     )
     
@@ -60,8 +60,6 @@ def main():
             # Display extracted text
             st.subheader("Extracted Medicine Name")
             st.write(extracted_text)
-            
-            # Search medical database
             results = search_medical_database(extracted_text)
             
             # Display search results
